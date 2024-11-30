@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录与注册</title>
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <style type="text/css">
+        /*iconfont图标，第三方登录用*/
+        @font-face {
+            font-family: 'iconfont';
+            src: url('//at.alicdn.com/t/font_1427254_qm1jfg7xsu.eot');
+            src: url('//at.alicdn.com/t;font_1427254_qm1jfg7xsu.eot?#iefix') format('embedded-opentype'),
+            url('//at.alicdn.com/t;font_1427254_qm1jfg7xsu.woff2') format('woff2'),
+            url('//at.alicdn.com/t;font_1427254_qm1jfg7xsu.woff') format('woff'),
+            url('//at.alicdn.com/t;font_1427254_qm1jfg7xsu.ttf') format('truetype'),
+            url('//at.alicdn.com/t;font_1427254_qm1jfg7xsu.svg#iconfont') format('svg');
+        }
+
+        .iconfont {
+            font-family: "iconfont", serif!important;
+            font-size: 28px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-stroke-width: 0;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-size: cover;
+            background-color: rgb(30, 100, 110);
+            background-blend-mode: luminosity;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .common-input-box {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #fff;
+            border: 1px solid #e4e6e5;
+            outline: none;
+            border-radius: 4px;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 添加轻微阴影，增强立体感 */
+        }
+
+        .common-input-box:focus {
+            border-color: rgb(20, 140, 160);
+            box-shadow: 0 0 5px rgba(20, 140, 160, 0.5);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .form-wrap {
+            width: 400px;
+            max-width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15); /* 调整表单阴影，增强层次感 */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 水平居中表单内容 */
+        }
+
+        .sign-box {
+            width: 100%;
+            display: flex;
+            justify-content: space-between; /* 均匀分布登录/注册切换标题 */
+            margin-bottom: 20px;
+        }
+
+        .sign-box h3 {
+            flex: 1;
+            margin-bottom: 0; /* 去除之前设置的底部间距，由sign-box统一设置 */
+            padding-bottom: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent; /* 初始化为透明边框，用于切换效果 */
+        }
+
+        .default {
+            color: #ddd;
+            /* 去除之前单独设置的底部边框，由active和default类共同控制切换效果 */
+        }
+
+        .active {
+            color: rgb(36, 169, 190);
+            border-bottom: 2px solid rgb(36, 169, 190);
+        }
+
+        .active:hover,
+        .default:hover {
+            color: rgb(36, 169, 190);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            outline: none;
+            border-radius: 5px;
+            background-color: rgb(36, 169, 190);
+            color: #fff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative; /* 为按钮添加相对定位，用于添加伪元素实现效果 */
+        }
+
+        .btn:hover {
+            background-color: rgb(20, 130, 150);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            background-color: rgb(10, 100, 120);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transform: translateY(2px);
+            transition: all 0.1s ease;
+        }
+
+        .btn::before { /* 按钮悬停时添加伪元素，实现立体效果 */
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .line-box {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 水平居中线条和第三方登录字样 */
+        }
+
+        .line {
+            flex: 1;
+            border-bottom: 1px solid #9b9b9b;
+            margin: 0 10px; /* 增加线条与其他元素的间距 */
+        }
+
+        .login-3rd {
+            flex: 1;
+            color: #9b9b9b;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .icon-box {
+            width: 100%;
+            display: flex;
+            justify-content: space-around; /* 均匀分布图标 */
+            margin-top: 20px;
+        }
+
+        .icon-box i {
+            flex: 1;
+            font-size: 28px;
+            color: #999;
+            transition: color 0.3s ease;
+            text-align: center;
+            cursor: pointer;
+            position: relative; /* 为图标添加相对定位，用于添加伪元素实现效果 */
+        }
+
+        .icon-box i:hover {
+            color: rgb(36, 169, 190);
+        }
+
+        .icon-box i::after { /* 图标悬停时添加伪元素，实现发光效果 */
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: rgba(36, 169, 190, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .icon-box i:hover::after {
+            opacity: 1;
+        }
+
+        #registerPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            max-width: 100%;
+            height: 380px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            z-index: 999;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 水平居中注册弹窗内容 */
+        }
+
+        #registerPopup h3 {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        #registerPopup form div {
+            margin: 12px 0;
+            padding: 0 15px;
+            width: 100%; /* 确保输入项占满容器宽度，便于布局 */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* 左对齐输入框和错误提示信息 */
+        }
+
+        #registerPopup.close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background-color: #ccc;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 30px;
+            transition: background-color 0.3s ease;
+        }
+
+        #registerPopup.close-btn:hover {
+            background-color: #999;
+        }
+
+        #top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        #top a h2 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 24px;
+            text-decoration: none;
+        }
+
+        .remember-box {
+            width: 70%;
+            display: flex;
+            align-items: center;
+            margin-top: 10px; /* 增加与其他元素的间距 */
+        }
+
+        .input-error {
+            color: red;
+            margin-top: 5px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .captcha-box {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* 均匀分布验证码输入框和图片 */
+        }
+
+        .captcha-img {
+            cursor: pointer;
+            width: 120px;
+            height: 40px;
+        }
+
+        .captcha-input {
+            width: 70%; /* 调整验证码输入框宽度，使其与图片比例更协调 */
+        }
+
+        @media (max-width: 600px) {
+            .form-wrap {
+                width: 90%;
+            }
+
+            .common-input-box {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 12px;
+            }
+
+            .btn {
+                font-size: 14px;
+            }
+
+            .icon-box i {
+                font-size: 24px;
+            }
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px; /* 调整标签字体大小，使其更协调 */
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        img {
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+
+        .captcha-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .captcha-img {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="top">
+    <a href="/index">
+        <h2>book-online</h2>
+    </a>
+</div>
+<div class="form-wrap">
+    <form id="loginForm" action="/login" method="post">
+        <fieldset>
+            <legend>登录信息</legend>
+            <div class="sign-box">
+                <h3 class="active">密码登录</h3>
+                <h3 class="default">短信登录/注册</h3>
+            </div>
+            <div>
+                <label for="username-login">
+                    <input type="text" name="account" class="common-input-box" placeholder="手机号/邮箱" id="username-login">
+                    <span class="input-error" id="accountError-login"></span>
+                </label>
+            </div>
+            <div>
+                <label for="password-login">
+                    <input type="password" name="password" class="common-input-box" placeholder="密码" id="password-login">
+                    <span class="input-error" id="passwordError"></span>
+                </label>
+            </div>
+            <div class="remember-box">
+                <p style="margin-right: 6px">记住我:</p>
+                <label>
+                    <input type="checkbox" id="remember" name="remember">
+                </label>
+            </div>
+            <div>
+                <input type="submit" value="立即登录" class="btn">
+            </div>
+            <div>
+                <input type="button" value="注册" id="showRegisterPopup" class="btn">
+            </div>
+            <div class="line-box">
+                <span class="line"></span>
+                <span class="login-3rd">第三方登录</span>
+                <span class="line"></span>
+            </div>
+            <div class="icon-box">
+                <i class="iconfont" style="color: rgb(81, 195, 50)">&#xe600;</i>
+                <i class="iconfont" style="color: rgb(48, 165, 221)">&#xe73e;</i>
+                <i class="iconfont" style="color: rgb(230, 23, 45)">&#xe636;</i>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<div id="registerPopup">
+    <h3>用户注册</h3>
+    <form id="registerForm" action="/register" method="post">
+        <div>
+            <label>
+                <input type="text" name="account" class="common-input-box" placeholder="手机号/邮箱">
+                <span class="input-error" id="registerAccountError"></span>
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="password" name="password" class="common-input-box" placeholder="密码">
+                <span class="input-error" id="registerPasswordError"></span>
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="text" name="nickname" class="common-input-box" placeholder="昵称">
+                <span class="input-error" id="registerNicknameError"></span>
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="text" name="avatar" class="common-input-box" placeholder="头像（图片URL地址）">
+                <span class="input-error" id="registerAvatarError"></span>
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="text" name="address" class="common-input-box" placeholder="地址">
+                <span class="input-error" id="registerAddressError"></span>
+            </label>
+        </div>
+        <div class="captcha-box">
+            <label>
+                <input type="text" name="captcha" class="captcha-input" placeholder="请输入验证码">
+                <span class="input-error" id="captchaError"></span>
+            </label>
+            <img src="/register?refreshCaptcha=true" alt="验证码" class="captcha-img" onclick="refreshCaptcha()">
+        </div>
+        <div>
+            <input type="button" value="关闭" class="close-btn">
+        </div>
+        <div>
+            <input type="submit" value="注册" id="registerBtn" class="btn">
+        </div>
+    </form>
+</div>
+<script>
+    function refreshCaptcha() {
+        const captchaImg = $('.captcha-img');
+        captchaImg.attr('src', '/register?refreshCaptcha=true&' + new Date().getTime());
+    }
+
+    $(document).ready(function () {
+        const showRegisterPopupBtn = $('#showRegisterPopup');
+        const registerPopup = $('#registerPopup');
+        const closeRegisterPopupBtn = $('#registerPopup .close-btn');
+        const registerBtn = $('#registerBtn');
+
+        // 显示注册弹窗
+        showRegisterPopupBtn.click(function () {
+            registerPopup.show();
+        });
+
+        // 关闭注册弹窗
+        closeRegisterPopupBtn.click(function () {
+            registerPopup.hide();
+        });
+
+        // 注册表单提交
+        registerBtn.click(function (e) {
+            e.preventDefault();
+
+            const formData = {
+                account: $('#registerForm input[name="account"]').val(),
+                password: $('#registerForm input[name="password"]').val(),
+                nickname: $('#registerForm input[name="nickname"]').val(),
+                avatar: $('#registerForm input[name="avatar"]').val(),
+                address: $('#registerForm input[name="address"]').val(),
+                captcha: $('#registerForm input[name="captcha"]').val()
+            };
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/register', // 根据实际情况修改后端地址
+                data: formData,
+                dataType: 'json',
+                success: function (response) {
+                    // 根据后端返回的结果显示相应提示信息
+                    if (response.message === "注册成功，请登录") {
+                        alert(response.message);
+                        // 这里可以添加代码跳转到登录页面等后续操作
+                    } else if (response.message === "该用户名已被占用，请重新选择用户名") {
+                        alert(response.message);
+                        // 可以添加代码清空用户名输入框等操作，方便用户重新输入
+                    } else if (response.message === "验证码错误，请重新输入") {
+                        alert(response.message);
+                        // 可以添加代码清空验证码输入框等操作，方便用户重新输入
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // 处理请求出错的情况，提供更详细的错误信息
+                    if (xhr.status === 400) {
+                        alert("注册请求参数错误，请检查输入内容是否符合要求");
+                    } else if (xhr.status === 500) {
+                        alert("服务器端出现问题，请稍后重试");
+                    } else {
+                        alert("注册请求出错，请稍后重试");
+                    }
+                }
+            });
+        });
+
+        // 验证账号格式的正则表达式
+        const accountRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$|^[1][3-9]\d{9}$/;
+
+        const accountInput = $('#account');
+        const passwordInput = $('#password');
+        const accountError = $('#accountError');
+
+        // 对账号输入框进行实时验证
+        accountInput.on('input', function () {
+            const value = $(this).val();
+            if (!accountRegex.test(value)) {
+                accountError.text('账号格式不正确');
+            } else {
+                accountError.text('');
+            }
+        });
+    });
+</script>
+
+</body>
+
+</html>
